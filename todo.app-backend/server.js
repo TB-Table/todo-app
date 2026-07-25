@@ -21,7 +21,8 @@ app.post('/todos',(req,res)=>{
   const newTodo = {
     id: Date.now(), // 用時間戳記生成不重複的 ID
     text: req.body.text,
-    iscompleted: req.body.iscompleted || false
+    iscompleted: req.body.iscompleted || false,
+    description: req.body.description || "",
   };
    todosList.push(newTodo);
    console.log("已完成")
@@ -29,6 +30,17 @@ app.post('/todos',(req,res)=>{
     res.json(newTodo); 
 })
 
+app.put('/todos/:id',(req,res)=>{
+  const todoId = Number(req.params.id);
+  const todo = todosList.find(item => item.id === todoId);
+
+  if (!todo) {
+    return res.status(404).json({ message: '找不到这个 todo' });
+  }
+
+  todo.description = req.body.description ?? '';
+  res.json(todo);
+})
 
 
 app.delete('/todos/:id',(req,res)=>{

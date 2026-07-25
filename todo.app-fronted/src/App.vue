@@ -7,6 +7,7 @@ const str = ref('')
 const list = ref([
 
 ])
+const openedId = ref(null)
 
 async function getlist(){
   const res = await axios({
@@ -23,7 +24,7 @@ async function add() {
 
   const update ={
     text :str.value,
-    iscompleted: false
+    iscompleted: false,
   }
 
   const res = await axios.post("http://localhost:8989/todos",update)
@@ -42,31 +43,124 @@ async function del(id){
 
 }
 
+async function saveDescription(item){
+  console.log(item)
+  await axios({
+    url:`http://localhost:8989/todos/${item.id}`,
+    method:"put",
+    data:{description : item.description}
+  })
+}
+
+
+function toggle(id) {
+  if(openedId.value === id){
+    openedId.value = null
+  } else{
+    openedId.value = id
+  }
+}
+
+
 
 </script>
 
 <template>
   <div class="todoapp">
         <div class="title">Todo App</div>
-        
-        <div class="Todo-from">
+
+         <div class="Todo-from">
             <input v-model="str" class="Todo-input" type="text" placeholder="Add a new task">
-        <div @click="add" class="Todo-Button">Add Task</div>
+            <div @click="add" class="Todo-Button">Add Task</div>
         </div>
-
+        
         <div v-for="(item,index) in list" :key="item.id ||index" :class="[item.iscompleted ? 'completed' : 'item']">
-            <div>
-            <input type="checkbox" v-model="item.iscompleted">
-            <span class="name">{{ item.text }}</span>
-            </div>
+            <div class="item-main-row">
 
-            <div @click="del(item.id)" class="delete">Delete</div>
+              <div class="item-left">
+                <input type="checkbox" v-model="item.iscompleted">
+                <span class="name">{{ item.text }}</span>
+              </div>
+
+              <div class="item-right">
+                <div @click="toggle(item.id)" class = "Detail">▼</div>
+                <div @click="del(item.id)" class="delete">Delete</div>
+              </div>
+            </div>
+              
+
+
+            <div v-if="openedId === item.id" class="item-detail-row">
+                <textarea 
+                  v-model="item.description" 
+                  @blur="saveDescription(item)" 
+                  placeholder="请输入简介...">
+                </textarea>
+            </div>
         </div>
   </div>
 
 </template>
 
 <style scoped>
+    .item-detail-row textarea {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 10px;
+      margin-top: 10px;
+      border: 1px solid #dfe1e5;
+      border-radius: 12px;       
+      resize: vertical;          /* 只允許上下拉伸高度 */
+      font-family: inherit;
+      font-size: 14px;
+    }
+
+    .item-detail-row {
+      width: 100%;
+      padding-bottom: 15px;     
+      border-top: 1px dashed #dfe1e5; 
+    }
+
+    .item-right {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .item-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .item-main-row {
+      display: flex;
+      width: 100%;
+      height: 50px;           
+      align-items: center;       /* 垂直置中 */
+      justify-content: space-between; /*左右排列*/
+    }
+
+    .item {
+      display: flex;
+      flex-direction: column;    /*上下排列 */
+      width: 60%;
+      min-height: 50px;          /* 改用最小高度 */
+      border-radius: 20px;
+      border: 1px solid #dfe1e5;
+      padding: 0 20px;          
+      margin: 10px auto;
+      box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 20px;
+      box-sizing: border-box;
+      background-color: white;
+      transition: all 0.2s ease;
+    }
+
+
+    .Detail{
+      cursor: pointer;
+      user-select: none;
+    }
 
     .completed{
       display: flex;
@@ -86,12 +180,13 @@ async function del(id){
     .delete{
         color: red;
         cursor: pointer;
+        user-select: none;
     }
 
     .item{
         display: flex;
         width: 60%;
-        height: 50px;
+        min-height: 50px;
         border-radius: 20px 20px 20px 20px;
         border: 1px solid #dfe1e5;
         padding: 10px;
@@ -99,6 +194,8 @@ async function del(id){
         align-items: center;
         box-shadow:rgba(149,157,165,0.2) 0px 8px 20px;
         justify-content: space-between;
+        flex-direction: column; 
+
     }
 
     .Todo-Button {
@@ -147,6 +244,7 @@ async function del(id){
         display: flex;
         justify-content: center;
         margin-top: 20px;
+        
     }
 
     :global(body) {
