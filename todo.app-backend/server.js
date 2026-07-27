@@ -32,13 +32,23 @@ app.post('/todos',(req,res)=>{
 
 app.put('/todos/:id',(req,res)=>{
   const todoId = Number(req.params.id);
+  const todo = todosList.find(item => item.id == todoId);
+  todo.description = req.body.description;
+  res.json(todo);
+})
+
+app.patch('/todos/:id/completed',(req,res)=>{
+  const todoId = Number(req.params.id);
+  const iscompleted = req.body.iscompleted;
   const todo = todosList.find(item => item.id === todoId);
 
-  if (!todo) {
-    return res.status(404).json({ message: '找不到这个 todo' });
-  }
+   if (!todo) {
+  return res.status(404).json({
+    message: 'Todo not found'
+  });
+}
 
-  todo.description = req.body.description ?? '';
+  todo.iscompleted = iscompleted
   res.json(todo);
 })
 

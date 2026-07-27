@@ -61,6 +61,15 @@ function toggle(id) {
   }
 }
 
+async function togglecheckbox(item){
+  await axios({
+    url:`http://localhost:8989/todos/${item.id}/completed`,
+    method:"patch",
+    data:{
+      iscompleted: item.iscompleted
+    }
+  })
+}
 
 
 </script>
@@ -78,7 +87,7 @@ function toggle(id) {
             <div class="item-main-row">
 
               <div class="item-left">
-                <input type="checkbox" v-model="item.iscompleted">
+                <input @change="togglecheckbox(item)" type="checkbox" v-model="item.iscompleted">
                 <span class="name">{{ item.text }}</span>
               </div>
 
