@@ -16,6 +16,10 @@ async function getlist(){
   }) 
   list.value = res.data
   console.log(res);
+
+  list.value.sort((a,b) => {
+    return Number(b.iscompleted) - Number(a.iscompleted)
+  })
 }
 getlist()
 
@@ -69,6 +73,7 @@ async function togglecheckbox(item){
       iscompleted: item.iscompleted
     }
   })
+  await getlist()
 }
 
 

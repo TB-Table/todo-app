@@ -14,6 +14,10 @@ app.use(cors());
 let todosList = [];
 
 app.get('/todos', (req, res) => {
+  todoslist.value.sort((a,b) => {
+    return Number(b.iscompleted) - Number(a.iscompleted)
+  })
+  
   res.json(todosList);
 });
 
