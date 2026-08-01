@@ -13,6 +13,8 @@ let startX = 0;
 let currentitem = null
 
 function dragstart(e,item){
+  if(item.iscompleted) return;
+  item.dragDistance = 0;
   currentitem = item
   startX = e.clientX;
 
@@ -40,15 +42,15 @@ function dragmove(e){
     animationFrame = null;
   });
 }
-
+const finishWidth = 900;
+const MinWidth = 800;
 async function dragend(){
   if (!currentitem) return;
-  const finishWidth = 800;
-  if (currentitem.dragDistance >= finishWidth){
+  if (currentitem.dragDistance >= MinWidth){
     currentitem.iscompleted = true;
+    currentitem.dragDistance = 0;
 
     await togglecheckbox(currentitem);
-    currentitem.dragDistance = 0;
   } else{
     currentitem.dragDistance = 0
   }
@@ -116,7 +118,7 @@ function toggle(id) {
   }
 }
 
-async function togglecheckbox(item){
+async function togglecheckbox(item){ 
   await axios({
     url:`http://localhost:8989/todos/${item.id}/completed`,
     method:"patch",
@@ -124,6 +126,7 @@ async function togglecheckbox(item){
       iscompleted: item.iscompleted
     }
   })
+  item.dragDistance = 0
   await getlist()
 }
 
@@ -146,7 +149,9 @@ async function togglecheckbox(item){
 
           <div class="drag-background">
             <div class="drag-progress"
-              :style="{ width: item.dragDistance + 'px' }"
+              :style="{width: item.iscompleted
+                ? finishWidth + 'px'
+                : item.dragDistance + 'px' }"
                :class="{dragging: currentitem === item}"
             ></div>
           </div>
@@ -220,6 +225,7 @@ async function togglecheckbox(item){
       resize: vertical;          /* 只允許上下拉伸高度 */
       font-family: inherit;
       font-size: 14px;
+      outline: none;
     }
 
     .item-detail-row {
@@ -274,19 +280,19 @@ async function togglecheckbox(item){
 
     .completed{
       display: flex;
-        width: 60%;
-        height: 50px;
-        border-radius: 20px 20px 20px 20px;
-        border: 1px solid #dfe1e5;
-        padding: 10px;
-        margin: 10px auto;
-        align-items: center;
-        box-shadow:rgba(149,157,165,0.2) 0px 8px 20px;
-        justify-content: space-between;
-        text-decoration: line-through;
-        /*opacity: 0.5;*/
-        position: relative;
-        overflow: hidden;
+      flex-direction: column;    /*上下排列 */
+      width: 60%;
+      min-height: 50px;          /* 改用最小高度 */
+      border-radius: 20px;
+      border: 1px solid #dfe1e5;
+      padding: 10px;          
+      margin: 10px auto;
+      box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 20px;
+      box-sizing: border-box;
+      background-color: white;
+      position: relative;
+      overflow: hidden;
+      justify-content: space-between;
     }
 
     .delete{
